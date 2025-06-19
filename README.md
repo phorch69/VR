@@ -1,4 +1,4 @@
-# 3D - Three.js
+# VR
 
 Aca estare realizando un proyecto con modelos 3D para usarlo con el VR utilizando las librerias Three.js y Anime.js
 
