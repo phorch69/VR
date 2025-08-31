@@ -1,11 +1,9 @@
 import * as THREE from 'three';
-
-/* -- VR -- */
-
-/**/
 import { BoxLineGeometry } from 'three/addons/geometries/BoxLineGeometry.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+
+/* -- VR -- */
 
 let camera, scene, raycaster, renderer;
 let controller1, controller2;
@@ -139,40 +137,6 @@ function init() {
 
 }
 
-// Función para manejar las entradas del gamepad
-function handleGamepadInput() {
-    const gamepads = navigator.getGamepads();
-    const gp = gamepads[0];  // Tomamos el primer gamepad conectado
-
-    if (gp) {
-        // Obtener los valores de los joysticks (ejes)
-        const leftStickX = gp.axes[0]; // Eje X del joystick izquierdo
-        const leftStickY = gp.axes[1]; // Eje Y del joystick izquierdo
-
-        // Usar los joysticks para mover el cubo
-        cube.position.x += leftStickX * 0.1;
-        cube.position.y -= leftStickY * 0.1;
-
-        // Botón A (índice 0) - Ejemplo de acción con un botón
-        if (gp.buttons[0].pressed) {
-            console.log('Botón A presionado');
-            // Podrías hacer algo más interesante, como cambiar el color del cubo
-            cube.material.color.set(0xff0000);
-        }
-
-        // Botón B (índice 1) - Ejemplo de otra acción
-        if (gp.buttons[1].pressed) {
-            console.log('Botón B presionado');
-            cube.material.color.set(0x0000ff); // Cambiar el color a azul
-        }
-
-        // Gatillo derecho (índice 7) - Para mover la cámara hacia adentro
-        if (gp.buttons[7].pressed) {
-            camera.position.z -= 0.1; // Acercar la cámara
-        }
-    }
-}
-
 
 function buildController( data ) {
 
@@ -209,9 +173,35 @@ function onWindowResize() {
 
 }
 
+function updateGamepad() {
+  const gamepads = navigator.getGamepads();
+  if (gamepads[0]) {
+    const gamepad = gamepads[0];
+
+    // Analizar los valores de los ejes para mover la cámara
+    const moveSpeed = 0.1;
+
+    if (gamepad.axes[0]) {
+      camera.position.x += gamepad.axes[0] * moveSpeed;
+    }
+    if (gamepad.axes[1]) {
+      camera.position.z += gamepad.axes[1] * moveSpeed;
+    }
+
+    // El control para la rotación (ejes 2 y 3)
+    const rotationSpeed = 0.02;
+    camera.rotation.y += gamepad.axes[2] * rotationSpeed;
+    camera.rotation.x += gamepad.axes[3] * rotationSpeed;
+  }
+}
+
 //
 
 function animate() {
+
+    requestAnimationFrame(animate);
+  // Actualizar el gamepad
+  updateGamepad();
 
     INTERSECTION = undefined;
 
@@ -250,9 +240,6 @@ function animate() {
     if ( INTERSECTION ) marker.position.copy( INTERSECTION );
 
     marker.visible = INTERSECTION !== undefined;
-
-    renderer.setAnimationLoop(animate); // Mantiene la sincronización
-    handleGamepadInput();
 
     renderer.render( scene, camera );
 }
